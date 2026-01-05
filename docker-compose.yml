@@ -11,5 +11,22 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  migrator:
+    build:
+      context: ./db
+      dockerfile: migrator/Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: urlshortener
+      DB_USER: urlshortener
+      DB_PASSWORD: urlshortener
+    depends_on:
+      - postgres
+    command: ["sh", "/migrations/apply-migrations.sh"]
+    volumes:
+      - ./db/migrations:/migrations/migrations:ro
+      - ./db/migrator/apply-migrations.sh:/migrations/apply-migrations.sh:ro
+
 volumes:
   pgdata:
