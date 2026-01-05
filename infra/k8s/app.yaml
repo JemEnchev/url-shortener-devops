@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/JemEnchev/url-shortener-devops:latest
+          image: ghcr.io/jemenchev/url-shortener-devops:latest
           ports:
             - containerPort: 8080
           env:
