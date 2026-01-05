@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: urlshortener-postgres
+    environment:
+      POSTGRES_DB: urlshortener
+      POSTGRES_USER: urlshortener
+      POSTGRES_PASSWORD: urlshortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrator:
+    build:
+      context: ./db
+      dockerfile: migrator/Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: urlshortener
+      DB_USER: urlshortener
+      DB_PASSWORD: urlshortener
+    depends_on:
+      - postgres
+    command: ["sh", "/migrations/apply-migrations.sh"]
+    volumes:
+      - ./db/migrations:/migrations/migrations:ro
+      - ./db/migrator/apply-migrations.sh:/migrations/apply-migrations.sh:ro
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: urlshortener-app
+    environment:
+      PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: urlshortener
+      DB_USER: urlshortener
+      DB_PASSWORD: urlshortener
+      BASE_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  pgdata:
