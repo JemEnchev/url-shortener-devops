@@ -9,6 +9,7 @@ The solution covers the full lifecycle from source control and CI to containeriz
 ## Architecture Overview
 
 **High-level architecture:**
+
 - Client interacts with a REST API
 - Node.js (Express) microservice handles requests
 - PostgreSQL stores shortened URLs and metadata
@@ -17,6 +18,7 @@ The solution covers the full lifecycle from source control and CI to containeriz
 - The service is deployed to a Kubernetes cluster
 
 **Core components:**
+
 - **Application:** Node.js + Express
 - **Database:** PostgreSQL
 - **CI/CD:** GitHub Actions
@@ -30,6 +32,7 @@ The solution covers the full lifecycle from source control and CI to containeriz
 ```text
 .
 ├── app/                    # Node.js application
+|   ├── public/		    # UI source code
 │   ├── src/                # Application source code
 │   ├── tests/              # Unit and integration tests (Jest)
 │   ├── Dockerfile          # Application Docker image
@@ -57,6 +60,7 @@ The solution covers the full lifecycle from source control and CI to containeriz
 ## Application Functionality
 
 ### API Endpoints
+
 - `GET /health` – liveness probe
 - `GET /ready` – readiness probe
 - `POST /shorten` – create a shortened URL
@@ -68,15 +72,18 @@ The solution covers the full lifecycle from source control and CI to containeriz
 ## Running Locally (Docker Compose)
 
 ### Prerequisites
+
 - Docker
 - Docker Compose
 
 ### Start the full stack
+
 ```bash
 docker compose up --build
 ```
 
 ### Test the service
+
 ```bash
 curl http://localhost:8080/health
 
@@ -95,12 +102,14 @@ Database schema changes are managed using versioned SQL migrations.
 - A dedicated **migrator container** applies them automatically
 
 Run migrations manually:
+
 ```bash
 docker compose up -d postgres
 docker compose run --rm migrator
 ```
 
 This approach ensures:
+
 - Repeatable migrations
 - No manual database changes
 - Compatibility with CI pipelines
@@ -112,6 +121,7 @@ This approach ensures:
 Implemented using **GitHub Actions**, triggered on Pull Requests.
 
 ### CI steps
+
 1. Linting (ESLint)
 2. Unit tests (Jest)
 3. Database migrations smoke test
@@ -127,6 +137,7 @@ This ensures every change is validated before being merged.
 The CD pipeline is triggered on **push to `main`**.
 
 ### CD steps
+
 1. Build Docker image for the application
 2. Tag image with:
    - `latest`
@@ -134,6 +145,7 @@ The CD pipeline is triggered on **push to `main`**.
 3. Push image to **GitHub Container Registry (GHCR)**
 
 Image location:
+
 ```
 ghcr.io/jemenchev/url-shortener-devops
 ```
@@ -145,6 +157,7 @@ ghcr.io/jemenchev/url-shortener-devops
 The application is deployed to a Kubernetes cluster using declarative manifests.
 
 ### Kubernetes resources
+
 - Namespace
 - PostgreSQL Deployment + Service
 - Application Deployment + Service
@@ -153,6 +166,7 @@ The application is deployed to a Kubernetes cluster using declarative manifests.
 - Rolling update strategy
 
 ### Deploy to Kubernetes
+
 ```bash
 kubectl apply -f infra/k8s/namespace.yaml
 kubectl apply -f infra/k8s/postgres-secret.yaml
@@ -161,11 +175,13 @@ kubectl apply -f infra/k8s/app.yaml
 ```
 
 ### Port-forward for local access
+
 ```bash
 kubectl -n urlshortener port-forward svc/urlshortener-app 8080:8080
 ```
 
 ### Test
+
 ```bash
 curl http://localhost:8080/health
 ```
@@ -188,16 +204,19 @@ kubectl -n urlshortener rollout history deploy/urlshortener-app
 This project uses **CodeQL** for Static Application Security Testing (SAST).
 
 ### Why CodeQL?
+
 - Detects vulnerabilities early in the SDLC
 - Analyzes code without executing it
 - Prevents insecure code from reaching production
 
 ### How it is used
+
 - Runs automatically on every Pull Request
 - Scans the full codebase
 - Fails the pipeline if critical issues are found
 
 Results are visible in:
+
 ```
 GitHub → Security → Code scanning alerts
 ```
@@ -207,11 +226,13 @@ GitHub → Security → Code scanning alerts
 ## Demo
 
 A step-by-step live demo script is available in:
+
 ```
 docs/demo.md
 ```
 
 The demo covers:
+
 - Architecture overview
 - CI/CD pipelines
 - Kubernetes deployment
@@ -233,6 +254,7 @@ The demo covers:
 ## Conclusion
 
 This project demonstrates a complete DevOps workflow:
+
 - Infrastructure as Code
 - Automated CI/CD pipelines
 - Secure containerized application
