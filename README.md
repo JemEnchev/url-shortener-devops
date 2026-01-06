@@ -32,7 +32,7 @@ The solution covers the full lifecycle from source control and CI to containeriz
 ```text
 .
 ├── app/                    # Node.js application
-|   ├── public/		    # UI source code
+|   ├── public/		          # UI source code
 │   ├── src/                # Application source code
 │   ├── tests/              # Unit and integration tests (Jest)
 │   ├── Dockerfile          # Application Docker image
