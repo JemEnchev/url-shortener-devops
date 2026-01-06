@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>URL Shortener</title>
+
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>URL Shortener</h1>
+        <p>Paste a URL and generate a short link.</p>
+
+        <form id="f">
+          <input id="url" type="url" placeholder="https://example.com" required />
+          <button type="submit">Shorten</button>
+        </form>
+
+        <div class="row">
+          <div class="muted" id="status">Ready.</div>
+        </div>
+
+        <div class="row" id="outRow" style="display:none;">
+          <div class="pill" id="out"></div>
+          <button id="copyBtn" type="button">Copy</button>
+          <a id="openLink" href="#" target="_blank">Open</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="/ui.js"></script>
+  </body>
+</html>

@@ -1,8 +1,12 @@
 const express = require("express");
+const path = require("path");
 const { query } = require("./db");
 const { generateCode } = require("./code");
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, "..", "public")));
+
 app.use(express.json());
 
 app.get("/", (req, res) => res.status(200).send("URL Shortener API"));
@@ -18,7 +22,6 @@ function isValidHttpUrl(value) {
   }
 }
 
-// Stats (ВАЖНО: преди /:code)
 app.get("/stats/:code", async (req, res) => {
   const { code } = req.params;
 
@@ -27,7 +30,9 @@ app.get("/stats/:code", async (req, res) => {
     [code]
   );
 
-  if (result.rowCount === 0) return res.status(404).json({ error: "Not found" });
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: "Not found" });
+  }
 
   return res.status(200).json(result.rows[0]);
 });
@@ -42,14 +47,20 @@ app.post("/shorten", async (req, res) => {
   for (let i = 0; i < 5; i++) {
     const code = generateCode(7);
     try {
-      await query("INSERT INTO links(code, original_url) VALUES($1, $2)", [code, url]);
+      await query(
+        "INSERT INTO links(code, original_url) VALUES($1, $2)",
+        [code, url]
+      );
 
       const baseUrl =
         process.env.BASE_URL || `http://localhost:${process.env.PORT || 8080}`;
 
-      return res.status(201).json({ code, shortUrl: `${baseUrl}/${code}` });
+      return res.status(201).json({
+        code,
+        shortUrl: `${baseUrl}/${code}`,
+      });
     } catch (err) {
-      if (err && err.code === "23505") continue;
+      if (err && err.code === "23505") continue; // unique violation
       console.error(err);
       return res.status(500).json({ error: "Internal error" });
     }
@@ -58,14 +69,24 @@ app.post("/shorten", async (req, res) => {
   return res.status(503).json({ error: "Could not generate unique code" });
 });
 
-// Redirect (след stats!)
+// Redirect
 app.get("/:code", async (req, res) => {
   const { code } = req.params;
 
-  const result = await query("SELECT original_url FROM links WHERE code = $1", [code]);
-  if (result.rowCount === 0) return res.status(404).json({ error: "Not found" });
+  const result = await query(
+    "SELECT original_url FROM links WHERE code = $1",
+    [code]
+  );
 
-  query("UPDATE links SET clicks = clicks + 1 WHERE code = $1", [code]).catch(() => {});
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: "Not found" });
+  }
+
+  query(
+    "UPDATE links SET clicks = clicks + 1 WHERE code = $1",
+    [code]
+  ).catch(() => {});
+
   return res.redirect(302, result.rows[0].original_url);
 });
 
